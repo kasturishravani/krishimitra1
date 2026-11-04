@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Emergency Help & Rapid SOS – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold text-danger mb-1">
+        <i class="bi bi-shield-exclamation text-danger me-2"></i>Farmer Emergency Response & SOS Center
+      </h3>
+      <p class="text-muted small mb-0">
+        Direct hotline to certified agricultural scientists and instant reporting for sudden pest invasions, flood damage, or spurious inputs.
+      </p>
+    </div>
+    <a href="tel:18001801551" class="btn btn-danger btn-lg rounded-pill px-4 shadow">
+      <i class="bi bi-telephone-fill me-2"></i>Call KCC 1800-180-1551
+    </a>
+  </div>
+
+  <div class="row g-4 mb-5">
+    
+    <!-- Left Column: Helplines Directory -->
+    <div class="col-lg-6">
+      <div class="km-card p-4 h-100 border-top border-4 border-danger">
+        <h5 class="fw-bold text-dark mb-3"><i class="bi bi-headset text-danger me-2"></i>Verified Agricultural Helplines</h5>
+        
+        <div class="d-flex flex-column gap-3">
+          {% for h in helplines %}
+          <div class="p-3 rounded-3 border bg-light">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <div>
+                <h6 class="fw-bold text-dark mb-0">{{ h.name }}</h6>
+                <div class="small text-muted">{{ h.te_name }}</div>
+              </div>
+              <span class="badge bg-{{ h.badge }}-subtle text-{{ h.badge }} border border-{{ h.badge }}-subtle small">{{ h.timing }}</span>
+            </div>
+            
+            <p class="small text-muted my-2" style="font-size: 0.8rem; line-height: 1.4;">
+              {{ h.description }}
+            </p>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+              <span class="fw-bold fs-6 text-dark"><i class="bi bi-telephone-outbound text-success me-1"></i>{{ h.number }}</span>
+              <a href="tel:{{ h.number | replace('-', '') | replace(' ', '') }}" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                <i class="bi bi-telephone-fill me-1"></i>Call Now
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Emergency SOS Ticket Form -->
+    <div class="col-lg-6">
+      <div class="km-card p-4 p-md-5 h-100 border-top border-4 border-warning">
+        
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <span class="badge bg-danger p-2 rounded-circle"><i class="bi bi-broadcast"></i></span>
+          <div>
+            <h5 class="fw-bold text-dark mb-0">Submit Urgent Field SOS Request</h5>
+            <div class="small text-muted">Ticket will be logged in platform and forwarded to rapid extension staff</div>
+          </div>
+        </div>
+
+        <form method="POST" action="{{ url_for('emergency') }}" class="needs-validation" novalidate>
+          <div class="row g-3">
+            
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Farmer Name *</label>
+              <input type="text" class="form-control" name="farmer_name" value="{{ current_farmer.full_name if current_farmer else '' }}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Contact Phone Number *</label>
+              <input type="tel" class="form-control" name="contact_number" value="{{ current_farmer.mobile if current_farmer else '' }}" pattern="[0-9]{10}" placeholder="10-digit mobile" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">District *</label>
+              <select class="form-select" name="district">
+                <option value="Nirmal" {% if current_farmer and current_farmer.district == 'Nirmal' %}selected{% endif %}>Nirmal</option>
+                <option value="Adilabad" {% if current_farmer and current_farmer.district == 'Adilabad' %}selected{% endif %}>Adilabad</option>
+                <option value="Nizamabad" {% if current_farmer and current_farmer.district == 'Nizamabad' %}selected{% endif %}>Nizamabad</option>
+                <option value="Warangal" {% if current_farmer and current_farmer.district == 'Warangal' %}selected{% endif %}>Warangal</option>
+                <option value="Karimnagar" {% if current_farmer and current_farmer.district == 'Karimnagar' %}selected{% endif %}>Karimnagar</option>
+                <option value="Guntur" {% if current_farmer and current_farmer.district == 'Guntur' %}selected{% endif %}>Guntur</option>
+                <option value="Khammam" {% if current_farmer and current_farmer.district == 'Khammam' %}selected{% endif %}>Khammam</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Village / Mandal *</label>
+              <input type="text" class="form-control" name="village" value="{{ current_farmer.village if current_farmer else '' }}" placeholder="e.g., Basar" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Emergency Issue Type</label>
+              <select class="form-select" name="issue_type">
+                <option value="Pest Attack Alert" selected>Severe Pest Attack Alert (పురుగుల దాడి)</option>
+                <option value="Crop Disease Outbreak">Uncontrolled Crop Disease (తెగుళ్ల వ్యాప్తి)</option>
+                <option value="Flood / Waterlogging">Flash Flood & Waterlogging (వరద ముంపు)</option>
+                <option value="Spurious Seed / Pesticide">Fake Seeds or Expired Chemicals (నకిలీ విత్తనాలు)</option>
+                <option value="Motor / Electricity Failure">Agricultural Transformer / Motor Burnt (విద్యుత్ సమస్య)</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Urgency Severity</label>
+              <select class="form-select" name="severity">
+                <option value="Critical" class="text-danger fw-bold">Critical (Immediate rescue needed)</option>
+                <option value="High" selected class="text-warning fw-bold">High (Action within 24 hours)</option>
+                <option value="Medium">Medium (Guidance required)</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label small fw-semibold">Describe the Field Problem *</label>
+              <textarea class="form-control" name="description" rows="3" placeholder="Please describe crop affected, observed damage, symptoms, and exact plot location..." required></textarea>
+            </div>
+
+            <div class="col-12 mt-3">
+              <button type="submit" class="btn btn-danger w-100 py-2 fs-6 shadow">
+                <i class="bi bi-broadcast-pin me-1"></i>Broadcast Emergency SOS Ticket
+              </button>
+            </div>
+
+          </div>
+        </form>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Submitted User Tickets Section -->
+  {% if user_requests %}
+  <div class="km-card mb-4">
+    <div class="km-card-header d-flex justify-content-between align-items-center">
+      <div class="fw-bold"><i class="bi bi-clock-history text-danger me-2"></i>My Logged Emergency SOS Tickets</div>
+      <span class="badge bg-light text-dark border">{{ user_requests | length }} Records</span>
+    </div>
+    <div class="p-0">
+      <div class="table-responsive">
+        <table class="km-table">
+          <thead>
+            <tr>
+              <th>Ticket ID</th>
+              <th>Issue Type</th>
+              <th>Severity</th>
+              <th>Location</th>
+              <th>Description</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in user_requests %}
+            <tr>
+              <td class="fw-bold">#SOS-{{ r.id }}</td>
+              <td><span class="fw-semibold text-dark">{{ r.issue_type }}</span></td>
+              <td>
+                {% if r.severity == 'Critical' %}
+                  <span class="badge bg-danger">Critical</span>
+                {% elif r.severity == 'High' %}
+                  <span class="badge bg-warning text-dark">High</span>
+                {% else %}
+                  <span class="badge bg-info text-dark">Medium</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ r.village }}, {{ r.district }}</td>
+              <td class="small text-dark" style="max-width: 250px;">{{ r.description }}</td>
+              <td>
+                {% if r.status == 'Resolved' %}
+                  <span class="badge badge-healthy"><i class="bi bi-check-circle me-1"></i>Resolved</span>
+                {% elif r.status == 'In Progress' %}
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><i class="bi bi-arrow-repeat me-1"></i>In Progress</span>
+                {% else %}
+                  <span class="badge bg-warning-subtle text-warning border border-warning-subtle"><i class="bi bi-hourglass me-1"></i>Pending</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ r.created_at }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

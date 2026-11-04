@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}{{ disease.name }} – Disease Management Guide – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Breadcrumb & Back -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 small">
+        <li class="breadcrumb-item"><a href="{{ url_for('diseases_list') }}" class="text-success text-decoration-none">Diseases Guide</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ disease.crop }}</li>
+      </ol>
+    </nav>
+    <a href="{{ url_for('diseases_list') }}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Back to Directory
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Full Disease Profile -->
+    <div class="col-lg-8">
+      <div class="km-card p-4 p-md-5 border-top border-4 border-{{ disease.badge }}">
+        
+        <!-- Header Info -->
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+          <div>
+            <span class="badge bg-light text-dark border mb-2">{{ disease.crop }} | {{ disease.type }} Pathogen</span>
+            <h2 class="fw-bold text-dark mb-1">{{ disease.name }}</h2>
+            <h5 class="text-success fw-semibold">{{ disease.te_name }}</h5>
+          </div>
+          <span class="badge bg-{{ disease.badge }}-subtle text-{{ disease.badge }} border border-{{ disease.badge }}-subtle px-3 py-2 fs-6">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>{{ disease.severity }} Risk Level
+          </span>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- 1. Symptoms -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-danger d-flex align-items-center gap-2">
+            <i class="bi bi-eye-fill"></i>Identification & Field Symptoms
+          </h5>
+          <p class="text-dark" style="line-height: 1.7;">
+            {{ disease.symptoms }}
+          </p>
+        </div>
+
+        <!-- 2. Causes & Conditions -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-cloud-haze2 text-info"></i>Favorable Environmental Conditions & Causes
+          </h5>
+          <p class="text-muted" style="line-height: 1.6;">
+            {{ disease.causes }}
+          </p>
+        </div>
+
+        <!-- 3. Biological & Organic Remedies -->
+        <div class="p-3 mb-4 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25">
+          <h5 class="fw-bold text-success d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-flower1"></i>Biological & Natural Remedies (సేంద్రీయ నివారణ)
+          </h5>
+          <p class="text-dark mb-0" style="line-height: 1.6;">
+            {{ disease.organic_remedy }}
+          </p>
+        </div>
+
+        <!-- 4. Chemical Treatment -->
+        <div class="p-3 mb-4 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25">
+          <h5 class="fw-bold text-primary d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-capsule"></i>Recommended Chemical Sprays & Dosage (రసాయన నివారణ)
+          </h5>
+          <p class="text-dark mb-2" style="line-height: 1.6;">
+            {{ disease.chemical_remedy }}
+          </p>
+          <div class="small text-muted">
+            <em>* Always use safety masks and protective gloves while spraying. Follow 10-14 days waiting period before crop harvest.</em>
+          </div>
+        </div>
+
+        <!-- 5. Preventive Agronomy Practices -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark d-flex align-items-center gap-2">
+            <i class="bi bi-shield-check text-success"></i>Preventive Cultural Practices (ముందస్తు జాగ్రత్తలు)
+          </h5>
+          <p class="text-muted" style="line-height: 1.6;">
+            {{ disease.prevention }}
+          </p>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="pt-3 border-top d-flex flex-wrap gap-2 justify-content-between align-items-center">
+          <button type="button" class="btn btn-km-outline" id="btnPrintPage">
+            <i class="bi bi-printer me-1"></i>Print Treatment Sheet
+          </button>
+          <button type="button" class="btn btn-km-primary" onclick="speakTreatment()">
+            <i class="bi bi-volume-up-fill me-1"></i>Listen Spoken Guide
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right Column: Related Diseases & Emergency -->
+    <div class="col-lg-4">
+      
+      <!-- Voice Assistant Helper Box -->
+      <div class="km-card p-4 mb-4 text-center">
+        <div class="stat-icon green mx-auto mb-2">
+          <i class="bi bi-mic"></i>
+        </div>
+        <h6 class="fw-bold mb-1">Have Questions About This Pest?</h6>
+        <p class="small text-muted mb-3">Speak to KrishiMitra Voice Assistant in Telugu or English for instant clarification.</p>
+        <button type="button" class="btn btn-sm btn-km-primary rounded-pill w-100" data-bs-toggle="modal" data-bs-target="#kmVoiceModal">
+          <i class="bi bi-mic-fill text-warning me-1"></i>Ask Voice Assistant
+        </button>
+      </div>
+
+      <!-- Related in this crop -->
+      <div class="km-card mb-4">
+        <div class="km-card-header">
+          <div class="fw-bold"><i class="bi bi-flower2 text-success me-2"></i>Other {{ disease.crop }} Diseases</div>
+        </div>
+        <div class="p-3">
+          {% if related %}
+          <div class="d-flex flex-column gap-2">
+            {% for r in related %}
+            <a href="{{ url_for('disease_detail', disease_id=r.id) }}" class="p-2 rounded border bg-light text-decoration-none d-block">
+              <div class="fw-bold text-dark small">{{ r.name }}</div>
+              <div class="text-muted" style="font-size: 0.75rem;">{{ r.te_name }}</div>
+            </a>
+            {% endfor %}
+          </div>
+          {% else %}
+          <div class="small text-muted">No other profiles for this crop.</div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Emergency Helpline Widget -->
+      <div class="p-3 rounded-4 bg-danger bg-opacity-10 border border-danger border-opacity-25">
+        <div class="fw-bold text-danger mb-1"><i class="bi bi-telephone-fill me-1"></i>Uncontrolled Pest Infestation?</div>
+        <p class="small text-muted mb-2">If chemical or bio sprays fail, report an emergency SOS or consult university scientists.</p>
+        <a href="{{ url_for('emergency') }}" class="btn btn-sm btn-danger w-100 fw-bold">
+          Submit Rapid SOS Alert
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function speakTreatment() {
+  if (window.krishiVoice) {
+    const speech = "Treatment for {{ disease.name }}: {{ disease.organic_remedy | replace('\"', '') }}. Alternatively: {{ disease.chemical_remedy | replace('\"', '') }}";
+    window.krishiVoice.speak(speech, 'en');
+  }
+}
+</script>
+{% endblock %}

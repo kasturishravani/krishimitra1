@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Advisory Engine – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">
+        <i class="bi bi-compass text-success me-2"></i>Intelligent Crop Advisory
+      </h3>
+      <p class="text-muted small mb-0">
+        Scientifically calibrated crop recommendations tailored to your soil characteristics and seasonal agro-climatic window.
+      </p>
+    </div>
+    <a href="{{ url_for('crops_add') }}" class="btn btn-km-primary rounded-pill shadow-sm">
+      <i class="bi bi-plus-lg me-1"></i>Track Recommended Crop
+    </a>
+  </div>
+
+  <!-- Interactive Soil & Season Selector -->
+  <div class="km-card p-4 mb-4 shadow-sm">
+    <form method="POST" action="{{ url_for('crop_advisory') }}" class="row g-3 align-items-end">
+      
+      <div class="col-md-5 col-12">
+        <label for="soil_type" class="form-label fw-semibold small text-success">
+          <i class="bi bi-layers-fill me-1"></i>Select Soil Classification
+        </label>
+        <select class="form-select form-select-lg fs-6" id="soil_type" name="soil_type">
+          <option value="Black Soil" {% if selected_soil == 'Black Soil' %}selected{% endif %}>Black Cotton Soil (నల్లరేగడి నేల) - High moisture retention</option>
+          <option value="Red Soil" {% if selected_soil == 'Red Soil' %}selected{% endif %}>Red Sandy Loam (ఎర్ర నేల) - Well-drained, porous</option>
+          <option value="Clay Loam" {% if selected_soil == 'Clay Loam' %}selected{% endif %}>Clay Loam (మట్టి నేల) - Heavy, ideal for paddy/wetland</option>
+        </select>
+      </div>
+
+      <div class="col-md-5 col-12">
+        <label for="season" class="form-label fw-semibold small text-success">
+          <i class="bi bi-calendar-range-fill me-1"></i>Select Sowing Season
+        </label>
+        <select class="form-select form-select-lg fs-6" id="season" name="season">
+          <option value="Kharif" {% if selected_season == 'Kharif' %}selected{% endif %}>Kharif Season (Monsoon / జూన్ - అక్టోబర్)</option>
+          <option value="Rabi" {% if selected_season == 'Rabi' %}selected{% endif %}>Rabi Season (Winter / అక్టోబర్ - మార్చి)</option>
+          <option value="Zaid" {% if selected_season == 'Zaid' %}selected{% endif %}>Zaid Season (Summer / మార్చి - జూన్)</option>
+        </select>
+      </div>
+
+      <div class="col-md-2 col-12">
+        <button type="submit" class="btn btn-km-primary btn-lg fs-6 w-100">
+          <i class="bi bi-magic me-1"></i>Get Advice
+        </button>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Recommended Crops Display -->
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h5 class="fw-bold mb-0">
+      Recommended Crops for 
+      <span class="text-success">{{ selected_soil }}</span> in 
+      <span class="text-primary">{{ selected_season }} Season</span>
+    </h5>
+    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+      {{ recommended_crops | length }} Optimal Options Found
+    </span>
+  </div>
+
+  <div class="row g-4">
+    {% for c in recommended_crops %}
+    <div class="col-lg-6 col-12">
+      <div class="km-card h-100 p-4 border-top border-4 border-success">
+        
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <h4 class="fw-bold text-dark mb-1">{{ c.crop }}</h4>
+            <div class="badge bg-light text-dark border">{{ c.variety }}</div>
+          </div>
+          <span class="badge bg-success text-white px-3 py-2 fs-6">
+            <i class="bi bi-star-fill text-warning me-1"></i>Top Choice
+          </span>
+        </div>
+
+        <div class="row g-2 mb-3 small">
+          <div class="col-sm-6">
+            <div class="p-2 rounded bg-light border">
+              <span class="text-muted d-block" style="font-size: 0.72rem;">SEED RATE</span>
+              <strong>{{ c.seed_rate }}</strong>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-2 rounded bg-light border">
+              <span class="text-muted d-block" style="font-size: 0.72rem;">MATURITY DURATION</span>
+              <strong>{{ c.duration_days }}</strong>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-2 rounded bg-light border">
+              <span class="text-muted d-block" style="font-size: 0.72rem;">EXPECTED YIELD</span>
+              <strong class="text-success">{{ c.expected_yield }}</strong>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-2 rounded bg-light border">
+              <span class="text-muted d-block" style="font-size: 0.72rem;">WATER REQUIREMENT</span>
+              <strong>{{ c.water_need }}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="mb-3 small">
+          <strong class="text-dark d-block mb-1"><i class="bi bi-flower1 text-success me-1"></i>Recommended Fertilizer Dosage (NPK):</strong>
+          <span class="text-muted">{{ c.fertilizer }}</span>
+        </div>
+
+        <div class="p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 small mb-3">
+          <strong class="text-success d-block mb-1"><i class="bi bi-lightbulb-fill text-warning me-1"></i>Agronomy Pro Tip:</strong>
+          <span class="text-muted">{{ c.tips }}</span>
+        </div>
+
+        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+          <a href="{{ url_for('crops_add') }}" class="btn btn-sm btn-km-primary">
+            <i class="bi bi-plus-circle me-1"></i>Register This Crop
+          </a>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="askCropQuery('{{ c.crop }}')">
+            <i class="bi bi-chat-dots me-1"></i>Ask AI About {{ c.crop }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function askCropQuery(cropName) {
+  if (window.krishiChat) {
+    window.krishiChat.openChat();
+    const input = document.getElementById('kmChatInput');
+    if (input) {
+      input.value = `Tell me about fertilizer and pest management for ${cropName}`;
+      window.krishiChat.sendMessage();
+    }
+  }
+}
+</script>
+{% endblock %}

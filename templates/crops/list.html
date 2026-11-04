@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Tracking & Lifecycle Management – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header & Actions -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">
+        <i class="bi bi-card-checklist text-success me-2"></i>Crop Tracking & Field Records
+      </h3>
+      <p class="text-muted small mb-0">
+        Monitor crop lifecycle stages, soil conditions, health status, and logging activities.
+      </p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{{ url_for('crops_add') }}" class="btn btn-km-primary rounded-pill shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i>Track New Crop
+      </a>
+      <a href="{{ url_for('crop_advisory') }}" class="btn btn-outline-success rounded-pill shadow-sm">
+        <i class="bi bi-compass me-1"></i>Crop Advisory
+      </a>
+    </div>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="km-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('crops_list') }}" class="row g-2 align-items-center">
+      <div class="col-md-5 col-12">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0" name="q" placeholder="Search by crop name or variety..." value="{{ search_q }}">
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <select class="form-select" name="stage">
+          <option value="">All Growth Stages</option>
+          <option value="Sowing" {% if stage_filter == 'Sowing' %}selected{% endif %}>Sowing</option>
+          <option value="Germination" {% if stage_filter == 'Germination' %}selected{% endif %}>Germination</option>
+          <option value="Vegetative" {% if stage_filter == 'Vegetative' %}selected{% endif %}>Vegetative</option>
+          <option value="Flowering" {% if stage_filter == 'Flowering' %}selected{% endif %}>Flowering</option>
+          <option value="Yield Formation" {% if stage_filter == 'Yield Formation' %}selected{% endif %}>Yield Formation</option>
+          <option value="Ripening" {% if stage_filter == 'Ripening' %}selected{% endif %}>Ripening</option>
+          <option value="Harvested" {% if stage_filter == 'Harvested' %}selected{% endif %}>Harvested</option>
+        </select>
+      </div>
+      <div class="col-md-3 col-6">
+        <select class="form-select" name="status">
+          <option value="">All Health Statuses</option>
+          <option value="Healthy" {% if status_filter == 'Healthy' %}selected{% endif %}>Healthy</option>
+          <option value="At Risk" {% if status_filter == 'At Risk' %}selected{% endif %}>At Risk</option>
+          <option value="Diseased" {% if status_filter == 'Diseased' %}selected{% endif %}>Diseased</option>
+        </select>
+      </div>
+      <div class="col-md-1 col-12 d-flex gap-1">
+        <button type="submit" class="btn btn-km-primary w-100" title="Apply Filter">
+          <i class="bi bi-filter"></i>
+        </button>
+        {% if search_q or stage_filter or status_filter %}
+        <a href="{{ url_for('crops_list') }}" class="btn btn-outline-secondary" title="Clear Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Crops Cards Grid -->
+  {% if crops %}
+  <div class="row g-4">
+    {% for c in crops %}
+    <div class="col-lg-4 col-md-6 col-12">
+      <div class="crop-card">
+        
+        <div class="crop-card-header">
+          <div>
+            <div class="crop-title">{{ c.crop_name }}</div>
+            <div class="crop-variety">{{ c.variety or 'Standard Variety' }}</div>
+          </div>
+          <div>
+            {% if c.health_status == 'Healthy' %}
+              <span class="badge badge-healthy"><i class="bi bi-check-circle me-1"></i>Healthy</span>
+            {% elif c.health_status == 'At Risk' %}
+              <span class="badge badge-risk"><i class="bi bi-exclamation-triangle me-1"></i>At Risk</span>
+            {% else %}
+              <span class="badge badge-diseased"><i class="bi bi-x-circle me-1"></i>Diseased</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="crop-meta-row">
+          <div class="crop-meta-item">
+            <i class="bi bi-grid-3x3 text-muted"></i>
+            <span><strong>{{ c.area_acres }}</strong> Acres</span>
+          </div>
+          <div class="crop-meta-item">
+            <i class="bi bi-layers text-muted"></i>
+            <span>{{ c.soil_type }}</span>
+          </div>
+          <div class="crop-meta-item">
+            <i class="bi bi-calendar3 text-muted"></i>
+            <span>Sown: {{ c.sowing_date }}</span>
+          </div>
+        </div>
+
+        <!-- Stage badge & Progress -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <span class="small fw-semibold text-muted">Current Stage:</span>
+            <span class="badge bg-success-subtle text-success border border-success-subtle fw-semibold">{{ c.stage }}</span>
+          </div>
+          {% set stages_order = ['Sowing', 'Germination', 'Vegetative', 'Flowering', 'Yield Formation', 'Ripening', 'Harvested'] %}
+          {% set cur_idx = stages_order.index(c.stage) if c.stage in stages_order else 2 %}
+          {% set pct = ((cur_idx + 1) / 7 * 100) | round | int %}
+          <div class="progress" style="height: 6px;">
+            <div class="progress-bar bg-success" role="progressbar" style="width: {{ pct }}%;" aria-valuenow="{{ pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+          </div>
+        </div>
+
+        {% if c.notes %}
+        <p class="small text-muted mb-3 text-truncate" title="{{ c.notes }}">
+          <i class="bi bi-card-text me-1"></i>{{ c.notes }}
+        </p>
+        {% endif %}
+
+        <!-- Card Footer Actions -->
+        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+          <a href="{{ url_for('crop_detail', crop_id=c.id) }}" class="btn btn-sm btn-km-primary">
+            <i class="bi bi-eye me-1"></i>View Progress
+          </a>
+          <div class="d-flex gap-1">
+            <a href="{{ url_for('crop_edit', crop_id=c.id) }}" class="btn btn-sm btn-outline-secondary" title="Edit details">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <form method="POST" action="{{ url_for('crop_delete', crop_id=c.id) }}" onsubmit="return confirm('Are you sure you want to remove this crop from tracking?');" class="d-inline">
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete crop">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="km-card p-5 text-center my-4">
+    <div class="stat-icon green mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2rem;">
+      <i class="bi bi-flower2"></i>
+    </div>
+    <h4>No Crops Found</h4>
+    <p class="text-muted">No crop records matched your current query or filters.</p>
+    <div class="d-flex justify-content-center gap-2 mt-3">
+      <a href="{{ url_for('crops_add') }}" class="btn btn-km-primary">
+        <i class="bi bi-plus-lg me-1"></i>Track New Crop
+      </a>
+      <a href="{{ url_for('crops_list') }}" class="btn btn-outline-secondary">
+        Reset Filters
+      </a>
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

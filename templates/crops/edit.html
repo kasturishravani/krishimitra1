@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Crop – {{ crop.crop_name }} – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-pencil-square text-success me-2"></i>Edit Crop Record
+          </h3>
+          <p class="text-muted small mb-0">Update growth stage, health status, or area for <strong>{{ crop.crop_name }} ({{ crop.variety }})</strong></p>
+        </div>
+        <a href="{{ url_for('crop_detail', crop_id=crop.id) }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Cancel & Return
+        </a>
+      </div>
+
+      <div class="km-card p-4 p-md-5">
+        <form method="POST" action="{{ url_for('crop_edit', crop_id=crop.id) }}" class="needs-validation" novalidate>
+          <div class="row g-3">
+            
+            <div class="col-md-6">
+              <label for="crop_name" class="form-label small fw-semibold">Crop Name *</label>
+              <input type="text" class="form-control" id="crop_name" name="crop_name" value="{{ crop.crop_name }}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label for="variety" class="form-label small fw-semibold">Variety / Hybrid</label>
+              <input type="text" class="form-control" id="variety" name="variety" value="{{ crop.variety or '' }}">
+            </div>
+
+            <div class="col-md-4">
+              <label for="sowing_date" class="form-label small fw-semibold">Sowing Date *</label>
+              <input type="date" class="form-control" id="sowing_date" name="sowing_date" value="{{ crop.sowing_date }}" required>
+            </div>
+
+            <div class="col-md-4">
+              <label for="area_acres" class="form-label small fw-semibold">Area (in Acres) *</label>
+              <input type="number" step="0.1" min="0.1" class="form-control" id="area_acres" name="area_acres" value="{{ crop.area_acres }}" required>
+            </div>
+
+            <div class="col-md-4">
+              <label for="soil_type" class="form-label small fw-semibold">Soil Type</label>
+              <select class="form-select" id="soil_type" name="soil_type">
+                <option value="Black Soil" {% if crop.soil_type == 'Black Soil' %}selected{% endif %}>Black Soil</option>
+                <option value="Red Soil" {% if crop.soil_type == 'Red Soil' %}selected{% endif %}>Red Soil</option>
+                <option value="Clay Loam" {% if crop.soil_type == 'Clay Loam' %}selected{% endif %}>Clay Loam</option>
+                <option value="Sandy Loam" {% if crop.soil_type == 'Sandy Loam' %}selected{% endif %}>Sandy Loam</option>
+                <option value="Alluvial" {% if crop.soil_type == 'Alluvial' %}selected{% endif %}>Alluvial</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="stage" class="form-label small fw-semibold">Growth Stage</label>
+              <select class="form-select" id="stage" name="stage">
+                <option value="Sowing" {% if crop.stage == 'Sowing' %}selected{% endif %}>1. Sowing (విత్తనం నాటే దశ)</option>
+                <option value="Germination" {% if crop.stage == 'Germination' %}selected{% endif %}>2. Germination (మొలకెత్తే దశ)</option>
+                <option value="Vegetative" {% if crop.stage == 'Vegetative' %}selected{% endif %}>3. Vegetative (శాఖీయ వృద్ధి దశ)</option>
+                <option value="Flowering" {% if crop.stage == 'Flowering' %}selected{% endif %}>4. Flowering (పూత దశ)</option>
+                <option value="Yield Formation" {% if crop.stage == 'Yield Formation' %}selected{% endif %}>5. Yield Formation (కాయ/గింజ దశ)</option>
+                <option value="Ripening" {% if crop.stage == 'Ripening' %}selected{% endif %}>6. Ripening (పక్వానికి వచ్చే దశ)</option>
+                <option value="Harvested" {% if crop.stage == 'Harvested' %}selected{% endif %}>7. Harvested (కోత పూర్తయింది)</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="health_status" class="form-label small fw-semibold">Health Status</label>
+              <select class="form-select" id="health_status" name="health_status">
+                <option value="Healthy" {% if crop.health_status == 'Healthy' %}selected{% endif %}>Healthy</option>
+                <option value="At Risk" {% if crop.health_status == 'At Risk' %}selected{% endif %}>At Risk</option>
+                <option value="Diseased" {% if crop.health_status == 'Diseased' %}selected{% endif %}>Diseased</option>
+              </select>
+            </div>
+
+            <div class="col-md-6">
+              <label for="expected_harvest_date" class="form-label small fw-semibold">Expected Harvest Date</label>
+              <input type="date" class="form-control" id="expected_harvest_date" name="expected_harvest_date" value="{{ crop.expected_harvest_date or '' }}">
+            </div>
+
+            <div class="col-md-6">
+              <label for="notes" class="form-label small fw-semibold">Field Observations & Notes</label>
+              <input type="text" class="form-control" id="notes" name="notes" value="{{ crop.notes or '' }}">
+            </div>
+
+            <div class="col-12 mt-4 d-flex gap-2">
+              <button type="submit" class="btn btn-km-primary px-4 py-2">
+                <i class="bi bi-save me-1"></i>Update Crop
+              </button>
+              <a href="{{ url_for('crop_detail', crop_id=crop.id) }}" class="btn btn-outline-secondary px-4 py-2">
+                Cancel
+              </a>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

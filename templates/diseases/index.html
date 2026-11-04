@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Crop Diseases & Pest Identification – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">
+        <i class="bi bi-bug text-danger me-2"></i>Crop Disease & Pest Management Guide
+      </h3>
+      <p class="text-muted small mb-0">
+        Certified remedies, symptom diagnostics, biological solutions (Neem/Jeevamrutha), and chemical control dosages.
+      </p>
+    </div>
+    <button type="button" class="btn btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#kmVoiceModal">
+      <i class="bi bi-mic-fill text-warning me-1"></i>Ask by Voice (తెలుగు / EN)
+    </button>
+  </div>
+
+  <!-- Search & Filter Card -->
+  <div class="km-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('diseases_list') }}" class="row g-2 align-items-center">
+      <div class="col-md-5 col-12">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0" name="q" placeholder="Search by crop, disease, symptom or Telugu term..." value="{{ search_q }}">
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <select class="form-select" name="crop">
+          <option value="">All Crops</option>
+          {% for cr in crops_available %}
+          <option value="{{ cr }}" {% if crop_filter == cr %}selected{% endif %}>{{ cr }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 col-6">
+        <select class="form-select" name="type">
+          <option value="">All Pathogen Types</option>
+          <option value="Fungal" {% if type_filter == 'Fungal' %}selected{% endif %}>Fungal Diseases</option>
+          <option value="Pest" {% if type_filter == 'Pest' %}selected{% endif %}>Pests & Insects</option>
+          <option value="Viral" {% if type_filter == 'Viral' %}selected{% endif %}>Viral & Vector-Borne</option>
+        </select>
+      </div>
+      <div class="col-md-1 col-12 d-flex gap-1">
+        <button type="submit" class="btn btn-km-primary w-100" title="Apply Filter">
+          <i class="bi bi-funnel"></i>
+        </button>
+        {% if search_q or crop_filter or type_filter %}
+        <a href="{{ url_for('diseases_list') }}" class="btn btn-outline-secondary" title="Clear Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Quick Symptom Diagnosis Helper Banner -->
+  <div class="p-3 mb-4 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
+    <div>
+      <span class="badge bg-success text-white mb-1"><i class="bi bi-magic me-1"></i>Quick Symptom Match</span>
+      <div class="small fw-bold text-dark">Notice any of these in your plot? Tap a symptom to view immediate treatment:</div>
+    </div>
+    <div class="d-flex flex-wrap gap-1">
+      <a href="{{ url_for('diseases_list', q='blast') }}" class="btn btn-sm btn-white bg-white border text-dark py-1 px-2" style="font-size: 0.8rem;">Spindle leaf spots (Paddy)</a>
+      <a href="{{ url_for('diseases_list', q='curl') }}" class="btn btn-sm btn-white bg-white border text-dark py-1 px-2" style="font-size: 0.8rem;">Curling leaves (Chilli)</a>
+      <a href="{{ url_for('diseases_list', q='bollworm') }}" class="btn btn-sm btn-white bg-white border text-dark py-1 px-2" style="font-size: 0.8rem;">Rosetted flowers (Cotton)</a>
+      <a href="{{ url_for('diseases_list', q='rust') }}" class="btn btn-sm btn-white bg-white border text-dark py-1 px-2" style="font-size: 0.8rem;">Yellow stripe powder (Wheat)</a>
+    </div>
+  </div>
+
+  <!-- Diseases Directory Grid -->
+  {% if diseases %}
+  <div class="row g-4">
+    {% for d in diseases %}
+    <div class="col-lg-6 col-12">
+      <div class="km-card km-card-hover h-100 p-4 border-top border-4 border-{{ d.badge }}">
+        
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <span class="badge bg-light text-dark border mb-1">{{ d.crop }}</span>
+            <h5 class="fw-bold text-dark mb-0">{{ d.name }}</h5>
+            <div class="small text-muted">{{ d.te_name }}</div>
+          </div>
+          <span class="badge bg-{{ d.badge }}-subtle text-{{ d.badge }} border border-{{ d.badge }}-subtle px-2 py-1">
+            <i class="bi bi-exclamation-triangle me-1"></i>{{ d.severity }}
+          </span>
+        </div>
+
+        <div class="mb-3">
+          <div class="small fw-semibold text-danger mb-1"><i class="bi bi-eye me-1"></i>Visible Symptoms:</div>
+          <p class="small text-muted mb-0" style="line-height: 1.5;">
+            {{ d.symptoms | truncate(150) }}
+          </p>
+        </div>
+
+        <div class="p-2 mb-3 rounded bg-light border small">
+          <div class="text-success fw-semibold"><i class="bi bi-flower1 me-1"></i>Organic / Bio Control:</div>
+          <div class="text-dark" style="font-size: 0.8rem;">{{ d.organic_remedy | truncate(110) }}</div>
+        </div>
+
+        <div class="p-2 mb-3 rounded bg-light border small">
+          <div class="text-primary fw-semibold"><i class="bi bi-capsule me-1"></i>Chemical Treatment (Dosage):</div>
+          <div class="text-dark" style="font-size: 0.8rem;">{{ d.chemical_remedy | truncate(110) }}</div>
+        </div>
+
+        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+          <a href="{{ url_for('disease_detail', disease_id=d.id) }}" class="btn btn-sm btn-km-primary">
+            <i class="bi bi-file-earmark-medical me-1"></i>Full Treatment Protocol
+          </a>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="askDiseaseQuery('{{ d.name }}')">
+            <i class="bi bi-chat-dots me-1"></i>Ask AI
+          </button>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="km-card p-5 text-center my-4">
+    <div class="stat-icon red mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2rem;">
+      <i class="bi bi-bug"></i>
+    </div>
+    <h4>No Diseases Found</h4>
+    <p class="text-muted">No disease or pest profiles matched your search term.</p>
+    <a href="{{ url_for('diseases_list') }}" class="btn btn-km-primary mt-2">
+      Reset All Filters
+    </a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function askDiseaseQuery(diseaseName) {
+  if (window.krishiChat) {
+    window.krishiChat.openChat();
+    const input = document.getElementById('kmChatInput');
+    if (input) {
+      input.value = `How to treat ${diseaseName}?`;
+      window.krishiChat.sendMessage();
+    }
+  }
+}
+</script>
+{% endblock %}

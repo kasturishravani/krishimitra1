@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block title %}{{ crop.crop_name }} Details – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <div class="d-flex align-items-center gap-2 mb-1">
+        <h3 class="fw-bold text-dark mb-0">{{ crop.crop_name }}</h3>
+        {% if crop.health_status == 'Healthy' %}
+          <span class="badge badge-healthy"><i class="bi bi-check-circle me-1"></i>Healthy</span>
+        {% elif crop.health_status == 'At Risk' %}
+          <span class="badge badge-risk"><i class="bi bi-exclamation-triangle me-1"></i>At Risk</span>
+        {% else %}
+          <span class="badge badge-diseased"><i class="bi bi-x-circle me-1"></i>Diseased</span>
+        {% endif %}
+      </div>
+      <div class="text-muted small">
+        Variety: <strong>{{ crop.variety or 'Standard' }}</strong> | Area: <strong>{{ crop.area_acres }} Acres</strong> | Soil: <strong>{{ crop.soil_type }}</strong>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="button" class="btn btn-sm btn-km-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#activityModal">
+        <i class="bi bi-plus-circle me-1"></i>Log Activity
+      </button>
+      <a href="{{ url_for('crop_edit', crop_id=crop.id) }}" class="btn btn-sm btn-outline-secondary rounded-pill">
+        <i class="bi bi-pencil me-1"></i>Edit Details
+      </a>
+      <a href="{{ url_for('crops_list') }}" class="btn btn-sm btn-light border rounded-pill">
+        <i class="bi bi-arrow-left me-1"></i>All Crops
+      </a>
+    </div>
+  </div>
+
+  <!-- Lifecycle Stage Visual Timeline Card -->
+  <div class="km-card p-4 mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <h6 class="fw-bold mb-0"><i class="bi bi-hourglass-split text-success me-2"></i>Crop Lifecycle Progress ({{ progress_pct }}%)</h6>
+      <span class="small text-muted">Sown on: <strong>{{ crop.sowing_date }}</strong> {% if crop.expected_harvest_date %} | Exp. Harvest: <strong>{{ crop.expected_harvest_date }}</strong>{% endif %}</span>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="progress mb-4" style="height: 10px; border-radius: 6px;">
+      <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ progress_pct }}%;" aria-valuenow="{{ progress_pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+
+    <!-- Milestone nodes -->
+    <div class="stage-timeline">
+      {% for st in stages %}
+      {% set loop_idx = loop.index0 %}
+      <div class="stage-node {% if loop_idx < stage_index %}completed{% elif loop_idx == stage_index %}current{% endif %}">
+        <div class="stage-dot">
+          {% if loop_idx < stage_index %}
+            <i class="bi bi-check-lg"></i>
+          {% else %}
+            {{ loop.index }}
+          {% endif %}
+        </div>
+        <span class="stage-label">{{ st }}</span>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Stage-specific Guidance Box -->
+    <div class="p-3 bg-light rounded-3 border mt-3 small">
+      <strong class="text-success"><i class="bi bi-info-circle me-1"></i>Stage Advisory for {{ crop.stage }}:</strong>
+      {% if crop.stage == 'Sowing' or crop.stage == 'Germination' %}
+        Ensure adequate soil moisture without water stagnation. Monitor germination rate within 7-10 days and fill gaps if necessary.
+      {% elif crop.stage == 'Vegetative' %}
+        Crucial period for weed management and split application of Nitrogen (Urea). Check under leaves for early sucking pests.
+      {% elif crop.stage == 'Flowering' %}
+        Avoid moisture stress. Maintain optimum moisture level. Apply Potash (MOP) to support strong blooms and prevent premature flower drop.
+      {% elif crop.stage == 'Yield Formation' %}
+        Monitor for bollworms, pod borers, and earhead pests. Maintain protective spray schedules if humidity remains high.
+      {% elif crop.stage == 'Ripening' %}
+        Gradually taper off irrigation 10-15 days prior to harvest to allow uniform maturity and high grain quality.
+      {% else %}
+        Ensure proper threshing and sun-dry grains below 13% moisture before warehousing to avoid storage pest damage.
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="row g-4">
+    <!-- Left Column: Activities History Table -->
+    <div class="col-lg-8">
+      <div class="km-card">
+        <div class="km-card-header d-flex justify-content-between align-items-center">
+          <div class="fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Field Operations & Activity Log</div>
+          <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#activityModal">
+            <i class="bi bi-plus-lg me-1"></i>Record Operation
+          </button>
+        </div>
+
+        <div class="p-0">
+          {% if activities %}
+          <div class="table-responsive">
+            <table class="km-table">
+              <thead>
+                <tr>
+                  <th>Operation</th>
+                  <th>Date</th>
+                  <th>Description / Input Dose</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for a in activities %}
+                <tr>
+                  <td>
+                    <span class="badge bg-success-subtle text-success border border-success-subtle">
+                      {{ a.activity_type }}
+                    </span>
+                  </td>
+                  <td class="text-nowrap small text-muted">{{ a.activity_date }}</td>
+                  <td class="small text-dark">{{ a.notes }}</td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="p-4 text-center text-muted small">
+            No field activities recorded yet. Click "Record Operation" above to log irrigation, fertilizer, or spray operations.
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Crop Specific Diseases Alert -->
+    <div class="col-lg-4">
+      <div class="km-card">
+        <div class="km-card-header">
+          <div class="fw-bold text-danger"><i class="bi bi-shield-exclamation me-2"></i>Watch Out For Pests & Diseases</div>
+        </div>
+        <div class="p-3">
+          {% if related_diseases %}
+          <div class="d-flex flex-column gap-3">
+            {% for d in related_diseases %}
+            <div class="p-2 rounded-3 border bg-light">
+              <div class="d-flex justify-content-between align-items-start mb-1">
+                <span class="fw-bold small text-dark">{{ d.name }}</span>
+                <span class="badge bg-{{ d.badge }}-subtle text-{{ d.badge }}" style="font-size: 0.7rem;">{{ d.severity }}</span>
+              </div>
+              <div class="small text-muted mb-2" style="font-size: 0.78rem;">{{ d.symptoms | truncate(90) }}</div>
+              <a href="{{ url_for('disease_detail', disease_id=d.id) }}" class="small fw-semibold text-success text-decoration-none">
+                View Certified Treatment <i class="bi bi-arrow-right"></i>
+              </a>
+            </div>
+            {% endfor %}
+          </div>
+          {% else %}
+          <p class="small text-muted mb-0">No common pest alerts reported for this crop type. Check general Disease Guide.</p>
+          <a href="{{ url_for('diseases_list') }}" class="btn btn-sm btn-outline-secondary mt-2 w-100">Open Disease Guide</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Quick Emergency Box -->
+      <div class="p-3 mt-3 rounded-3 bg-danger bg-opacity-10 border border-danger border-opacity-25 small">
+        <div class="fw-bold text-danger mb-1"><i class="bi bi-telephone-fill me-1"></i>Severe Outbreak on this Plot?</div>
+        <p class="text-muted mb-2" style="font-size: 0.78rem;">
+          If symptoms spread rapidly across your {{ crop.crop_name }} plot, contact Kisan Call Center immediately.
+        </p>
+        <a href="tel:18001801551" class="btn btn-sm btn-danger w-100 fw-bold">
+          <i class="bi bi-telephone me-1"></i>Call KCC 1800-180-1551
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Activity Modal -->
+<div class="modal fade" id="activityModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-lg rounded-4">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold text-dark">Log Field Activity</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="POST" action="{{ url_for('crop_add_activity', crop_id=crop.id) }}">
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Activity / Operation Type</label>
+            <select class="form-select" name="activity_type" required>
+              <option value="Irrigation" selected>Irrigation (నీటి పారుదల)</option>
+              <option value="Fertilizer">Fertilizer Application (ఎరువుల వేత)</option>
+              <option value="Pesticide Spray">Pesticide / Fungicide Spray (పురుగు మందుల పిచికారీ)</option>
+              <option value="Weeding">Weeding & Intercultivation (కలుపు తీత)</option>
+              <option value="Harvesting">Harvesting / Picking (పంట కోత / ఏరుట)</option>
+              <option value="Inspection">Field Inspection (క్షేత్ర పరిశీలన)</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Operation Date</label>
+            <input type="date" class="form-control" name="activity_date" id="activityModalDate" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Dosage / Details / Notes</label>
+            <textarea class="form-control" name="notes" rows="3" placeholder="e.g., Applied 50 kg Urea + 25 kg Potash as split dose, watered for 2 hours..." required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-km-primary">Save Activity</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const modalDate = document.getElementById('activityModalDate');
+  if (modalDate) {
+    modalDate.value = new Date().toISOString().split('T')[0];
+  }
+});
+</script>
+{% endblock %}

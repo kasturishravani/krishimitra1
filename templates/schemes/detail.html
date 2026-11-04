@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}{{ scheme.title }} – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Breadcrumb & Back -->
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-0 small">
+        <li class="breadcrumb-item"><a href="{{ url_for('schemes_list') }}" class="text-success text-decoration-none">Govt Schemes</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ scheme.code }}</li>
+      </ol>
+    </nav>
+    <a href="{{ url_for('schemes_list') }}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i>Back to Schemes
+    </a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-8">
+      <div class="km-card p-4 p-md-5 border-top border-4 border-{{ scheme.badge }}">
+        
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+          <div>
+            <span class="badge bg-{{ scheme.badge }}-subtle text-{{ scheme.badge }} border border-{{ scheme.badge }}-subtle mb-2">{{ scheme.code }}</span>
+            <h2 class="fw-bold text-dark mb-1">{{ scheme.title }}</h2>
+            <h5 class="text-success fw-semibold">{{ scheme.te_title }}</h5>
+          </div>
+          <span class="badge bg-light text-dark border px-3 py-2">
+            <i class="bi bi-tag-fill me-1"></i>{{ scheme.category }}
+          </span>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- Financial Benefit -->
+        <div class="p-3 mb-4 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25">
+          <h5 class="fw-bold text-success d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-cash-coin"></i>Financial Assistance & Benefit
+          </h5>
+          <p class="text-dark mb-0" style="line-height: 1.6;">
+            {{ scheme.benefit }}
+          </p>
+        </div>
+
+        <!-- Eligibility Criteria -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-person-check-fill text-primary"></i>Eligibility Criteria
+          </h5>
+          <p class="text-muted" style="line-height: 1.6;">
+            {{ scheme.eligibility }}
+          </p>
+        </div>
+
+        <!-- Required Documents Checklist -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-folder-check text-warning"></i>Required Documents Checklist
+          </h5>
+          <div class="row g-2 mt-1">
+            {% for doc in scheme.documents %}
+            <div class="col-md-6 col-12">
+              <div class="p-2 rounded bg-light border d-flex align-items-center gap-2 small">
+                <i class="bi bi-check-circle-fill text-success"></i>
+                <span class="text-dark fw-medium">{{ doc }}</span>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- How to Apply Steps -->
+        <div class="mb-4">
+          <h5 class="fw-bold text-dark d-flex align-items-center gap-2 mb-2">
+            <i class="bi bi-list-ol text-success"></i>Step-by-Step Application Procedure
+          </h5>
+          <div class="p-3 rounded-3 bg-light border text-dark" style="line-height: 1.8; white-space: pre-line;">
+            {{ scheme.how_to_apply }}
+          </div>
+        </div>
+
+        <!-- Official Link & Helpline Action Row -->
+        <div class="pt-3 border-top d-flex flex-wrap gap-2 justify-content-between align-items-center">
+          <a href="{{ scheme.official_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-km-primary">
+            <i class="bi bi-box-arrow-up-right me-1"></i>Open Official Government Portal
+          </a>
+          {% if scheme.contact_helpline %}
+          <div class="small text-muted">
+            <i class="bi bi-telephone-fill text-success me-1"></i>Helpline: <strong>{{ scheme.contact_helpline }}</strong>
+          </div>
+          {% endif %}
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right Column: Other Schemes & Voice -->
+    <div class="col-lg-4">
+      
+      <!-- Voice Query Box -->
+      <div class="km-card p-4 mb-4 text-center">
+        <div class="stat-icon green mx-auto mb-2">
+          <i class="bi bi-mic"></i>
+        </div>
+        <h6 class="fw-bold mb-1">Need Help Applying?</h6>
+        <p class="small text-muted mb-3">Ask our AI chatbot or voice assistant about documents, deadlines, and MeeSeva centers.</p>
+        <button type="button" class="btn btn-sm btn-km-primary rounded-pill w-100" data-bs-toggle="modal" data-bs-target="#kmVoiceModal">
+          <i class="bi bi-mic-fill text-warning me-1"></i>Ask Voice Assistant
+        </button>
+      </div>
+
+      <!-- Other Schemes -->
+      <div class="km-card mb-4">
+        <div class="km-card-header">
+          <div class="fw-bold"><i class="bi bi-award text-warning me-2"></i>Other Recommended Schemes</div>
+        </div>
+        <div class="p-3">
+          <div class="d-flex flex-column gap-2">
+            {% for o in other_schemes %}
+            <a href="{{ url_for('scheme_detail', scheme_id=o.id) }}" class="p-2 rounded border bg-light text-decoration-none d-block">
+              <span class="badge bg-{{ o.badge }} mb-1" style="font-size: 0.7rem;">{{ o.code }}</span>
+              <div class="fw-bold text-dark small">{{ o.title }}</div>
+            </a>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Nearby Agricultural Services – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">
+        <i class="bi bi-geo-alt-fill text-success me-2"></i>Nearby Agricultural Services & Inputs Directory
+      </h3>
+      <p class="text-muted small mb-0">
+        Locate nearest Soil Testing Labs, Authorized Fertilizer Retailers, Cold Storages, Custom Hiring Machinery Centers, and Veterinary Care.
+      </p>
+    </div>
+  </div>
+
+  <!-- Search & Filter Card -->
+  <div class="km-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('services') }}" class="row g-2 align-items-center">
+      <div class="col-md-7 col-12">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0" name="q" placeholder="Search by service name, dealer, or locality..." value="{{ search_q }}">
+        </div>
+      </div>
+      <div class="col-md-4 col-10">
+        <select class="form-select" name="category">
+          <option value="">All Service Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-1 col-2 d-flex gap-1">
+        <button type="submit" class="btn btn-km-primary w-100" title="Apply Filter">
+          <i class="bi bi-filter"></i>
+        </button>
+        {% if search_q or category_filter %}
+        <a href="{{ url_for('services') }}" class="btn btn-outline-secondary" title="Clear Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Services Grid -->
+  {% if services %}
+  <div class="row g-4">
+    {% for s in services %}
+    <div class="col-lg-6 col-12">
+      <div class="km-card km-card-hover h-100 p-4 border-top border-4 border-success d-flex flex-column">
+        
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle mb-1">{{ s.category }}</span>
+            <h5 class="fw-bold text-dark mb-0">{{ s.name }}</h5>
+            <div class="small text-muted"><i class="bi bi-geo-alt text-danger me-1"></i>{{ s.district }} (Approx: <strong>{{ s.distance_km }}</strong>)</div>
+          </div>
+          <span class="badge bg-light text-dark border small"><i class="bi bi-clock me-1"></i>{{ s.timing }}</span>
+        </div>
+
+        <p class="small text-muted my-2">
+          <i class="bi bi-building me-1"></i>{{ s.address }}
+        </p>
+
+        <div class="p-2 mb-3 rounded bg-light border small">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="text-muted">Contact Person:</span>
+            <span class="fw-semibold text-dark">{{ s.contact_person }}</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Direct Line:</span>
+            <strong class="text-success">{{ s.phone }}</strong>
+          </div>
+        </div>
+
+        <!-- Services / Inventory tags -->
+        <div class="mb-3">
+          <span class="small fw-semibold text-muted d-block mb-1">Offered Services & Implements:</span>
+          <div class="d-flex flex-wrap gap-1">
+            {% for item in s.services %}
+            <span class="badge bg-light text-dark border" style="font-size: 0.75rem;">
+              <i class="bi bi-check2 text-success me-1"></i>{{ item }}
+            </span>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="mt-auto pt-3 border-top d-flex justify-content-between align-items-center">
+          <a href="tel:{{ s.phone | replace(' ', '') | replace('-', '') }}" class="btn btn-sm btn-km-primary rounded-pill px-3">
+            <i class="bi bi-telephone-fill me-1"></i>Call Contact
+          </a>
+          <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-3" onclick="alert('Navigating to {{ s.name }} at {{ s.address }}')">
+            <i class="bi bi-signpost-2 me-1"></i>Directions
+          </button>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="km-card p-5 text-center my-4">
+    <div class="stat-icon blue mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2rem;">
+      <i class="bi bi-geo-alt"></i>
+    </div>
+    <h4>No Centers Found</h4>
+    <p class="text-muted">No agricultural services matched your query.</p>
+    <a href="{{ url_for('services') }}" class="btn btn-km-primary mt-2">Reset Filters</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

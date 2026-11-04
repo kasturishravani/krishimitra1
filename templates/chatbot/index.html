@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}AI Farmer Chatbot & Voice Assistant – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-9 col-xl-8">
+      
+      <!-- Top Title Bar -->
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <div>
+          <h3 class="fw-bold text-dark mb-1">
+            <i class="bi bi-robot text-success me-2"></i>KrishiMitra Bilingual AI Assistant
+          </h3>
+          <p class="text-muted small mb-0">Ask questions in <strong>English</strong> or <strong>తెలుగు (Telugu)</strong> using keyboard or voice.</p>
+        </div>
+        <button id="fullPageChatClearBtn" class="btn btn-sm btn-outline-secondary" title="Clear chat history">
+          <i class="bi bi-trash me-1"></i>Clear History
+        </button>
+      </div>
+
+      <!-- Main Dedicated Chat Container -->
+      <div class="km-card shadow-sm border rounded-4 d-flex flex-column" style="height: 600px;">
+        
+        <!-- Header -->
+        <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success text-white p-2 rounded-circle fs-6">🌱</span>
+            <div>
+              <div class="fw-bold small text-dark">KrishiMitra Knowledge Engine</div>
+              <div class="small text-muted" style="font-size: 0.75rem;">Instant answers for diseases, pests, fertilizers, schemes & prices</div>
+            </div>
+          </div>
+          <button type="button" class="btn btn-sm btn-success rounded-pill px-3 py-1" data-bs-toggle="modal" data-bs-target="#kmVoiceModal">
+            <i class="bi bi-mic-fill text-warning me-1"></i>Voice Mode
+          </button>
+        </div>
+
+        <!-- Chat Body -->
+        <div id="fullPageChatBody" class="km-chat-body p-4 flex-grow-1" style="overflow-y: auto;">
+          <div class="chat-bubble chat-bubble-bot">
+            <strong>నమస్కారం / Namaste!</strong><br>
+            Welcome to the dedicated KrishiMitra Assistant. How can I help with your farming operations today?<br>
+            <div class="small text-muted mt-1">Try tapping any of these quick queries:</div>
+            <div class="mt-2 d-flex flex-wrap gap-1">
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill chat-chip-pill py-0 px-2" style="font-size: 0.78rem;" data-query="Paddy Blast Remedy">Paddy Blast</button>
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill chat-chip-pill py-0 px-2" style="font-size: 0.78rem;" data-query="Cotton Pink Bollworm">Cotton Bollworm</button>
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill chat-chip-pill py-0 px-2" style="font-size: 0.78rem;" data-query="Cotton Mandi Price">Cotton Price</button>
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill chat-chip-pill py-0 px-2" style="font-size: 0.78rem;" data-query="PM-KISAN Scheme">PM-KISAN</button>
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill chat-chip-pill py-0 px-2" style="font-size: 0.78rem;" data-query="Preparation of Jeevamrutha">Jeevamrutha</button>
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill chat-chip-pill py-0 px-2" style="font-size: 0.78rem;" data-query="వరి లో తెగులు నివారణ">వరి తెగుళ్లు</button>
+              <button type="button" class="btn btn-sm btn-outline-success rounded-pill chat-chip-pill py-0 px-2" style="font-size: 0.78rem;" data-query="మార్కెట్ ధరలు">మార్కెట్ ధరలు</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Footer -->
+        <div class="p-3 bg-white border-top">
+          <div class="input-group">
+            <input id="fullPageChatInput" type="text" class="form-control" placeholder="Type your farming query in English or తెలుగు..." autocomplete="off">
+            <button id="fullPageVoiceMicBtn" class="btn btn-outline-secondary" type="button" title="Speak via microphone" data-bs-toggle="modal" data-bs-target="#kmVoiceModal">
+              <i class="bi bi-mic text-danger"></i>
+            </button>
+            <button id="fullPageChatSendBtn" class="btn btn-success px-4" type="button">
+              <i class="bi bi-send-fill me-1"></i>Send
+            </button>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-2 small text-muted" style="font-size: 0.75rem;">
+            <span>Press <kbd>Enter</kbd> to send query</span>
+            <span>Supports Web Speech API for voice synthesis</span>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

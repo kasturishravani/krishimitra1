@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Farmer Profile – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      
+      <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+          <h3 class="fw-bold text-dark mb-1">Farmer Profile</h3>
+          <p class="text-muted small mb-0">Manage your farm specifications, contact information, and security</p>
+        </div>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Back to Dashboard
+        </a>
+      </div>
+
+      <div class="km-card p-4 p-md-5">
+        <form method="POST" action="{{ url_for('profile') }}" class="needs-validation" novalidate>
+          <div class="row g-4">
+            
+            <!-- Personal Information -->
+            <div class="col-12">
+              <h5 class="fw-bold text-success border-bottom pb-2">
+                <i class="bi bi-person-circle me-2"></i>Personal Particulars
+              </h5>
+            </div>
+
+            <div class="col-md-6">
+              <label for="full_name" class="form-label fw-semibold small">Full Name *</label>
+              <input type="text" class="form-control" id="full_name" name="full_name" value="{{ farmer.full_name }}" required>
+            </div>
+
+            <div class="col-md-6">
+              <label class="form-label fw-semibold small">Mobile Number (Login ID)</label>
+              <input type="text" class="form-control bg-light" value="{{ farmer.mobile }}" readonly>
+              <div class="form-text" style="font-size: 0.75rem;">Mobile number is linked to your login credentials.</div>
+            </div>
+
+            <div class="col-md-6">
+              <label for="email" class="form-label fw-semibold small">Email Address</label>
+              <input type="email" class="form-control" id="email" name="email" value="{{ farmer.email or '' }}" placeholder="farmer@example.com">
+            </div>
+
+            <div class="col-md-6">
+              <label for="preferred_language" class="form-label fw-semibold small">Preferred Voice & Platform Language</label>
+              <select class="form-select" id="preferred_language" name="preferred_language">
+                <option value="en" {% if farmer.preferred_language == 'en' %}selected{% endif %}>English</option>
+                <option value="te" {% if farmer.preferred_language == 'te' %}selected{% endif %}>తెలుగు (Telugu)</option>
+                <option value="hi" {% if farmer.preferred_language == 'hi' %}selected{% endif %}>हिन्दी (Hindi)</option>
+              </select>
+            </div>
+
+            <!-- Land & Soil Parameters -->
+            <div class="col-12 mt-4">
+              <h5 class="fw-bold text-success border-bottom pb-2">
+                <i class="bi bi-geo-alt-fill me-2"></i>Farm & Soil Geography
+              </h5>
+            </div>
+
+            <div class="col-md-4">
+              <label for="state" class="form-label fw-semibold small">State</label>
+              <select class="form-select" id="state" name="state">
+                <option value="Telangana" {% if farmer.state == 'Telangana' %}selected{% endif %}>Telangana</option>
+                <option value="Andhra Pradesh" {% if farmer.state == 'Andhra Pradesh' %}selected{% endif %}>Andhra Pradesh</option>
+                <option value="Maharashtra" {% if farmer.state == 'Maharashtra' %}selected{% endif %}>Maharashtra</option>
+                <option value="Karnataka" {% if farmer.state == 'Karnataka' %}selected{% endif %}>Karnataka</option>
+                <option value="Haryana" {% if farmer.state == 'Haryana' %}selected{% endif %}>Haryana</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label for="district" class="form-label fw-semibold small">District (For Weather & Mandis)</label>
+              <select class="form-select" id="district" name="district">
+                <option value="Nirmal" {% if farmer.district == 'Nirmal' %}selected{% endif %}>Nirmal</option>
+                <option value="Adilabad" {% if farmer.district == 'Adilabad' %}selected{% endif %}>Adilabad</option>
+                <option value="Nizamabad" {% if farmer.district == 'Nizamabad' %}selected{% endif %}>Nizamabad</option>
+                <option value="Warangal" {% if farmer.district == 'Warangal' %}selected{% endif %}>Warangal</option>
+                <option value="Karimnagar" {% if farmer.district == 'Karimnagar' %}selected{% endif %}>Karimnagar</option>
+                <option value="Guntur" {% if farmer.district == 'Guntur' %}selected{% endif %}>Guntur</option>
+                <option value="Khammam" {% if farmer.district == 'Khammam' %}selected{% endif %}>Khammam</option>
+                <option value="Pune" {% if farmer.district == 'Pune' %}selected{% endif %}>Pune</option>
+                <option value="Karnal" {% if farmer.district == 'Karnal' %}selected{% endif %}>Karnal</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label for="village" class="form-label fw-semibold small">Village / Mandal</label>
+              <input type="text" class="form-control" id="village" name="village" value="{{ farmer.village or '' }}" placeholder="e.g., Basar">
+            </div>
+
+            <div class="col-md-6">
+              <label for="land_size_acres" class="form-label fw-semibold small">Total Land Holding (in Acres)</label>
+              <input type="number" step="0.1" min="0.1" class="form-control" id="land_size_acres" name="land_size_acres" value="{{ farmer.land_size_acres }}">
+            </div>
+
+            <div class="col-md-6">
+              <label for="soil_type" class="form-label fw-semibold small">Primary Field Soil Type</label>
+              <select class="form-select" id="soil_type" name="soil_type">
+                <option value="Black Soil" {% if farmer.soil_type == 'Black Soil' %}selected{% endif %}>Black Soil (నల్లరేగడి నేల)</option>
+                <option value="Red Soil" {% if farmer.soil_type == 'Red Soil' %}selected{% endif %}>Red Soil (ఎర్ర నేల)</option>
+                <option value="Clay Loam" {% if farmer.soil_type == 'Clay Loam' %}selected{% endif %}>Clay Loam (మట్టి నేల)</option>
+                <option value="Sandy Loam" {% if farmer.soil_type == 'Sandy Loam' %}selected{% endif %}>Sandy Loam (ఇసుక నేల)</option>
+                <option value="Alluvial" {% if farmer.soil_type == 'Alluvial' %}selected{% endif %}>Alluvial Soil (ఒండ్రు నేల)</option>
+              </select>
+            </div>
+
+            <!-- Security Section -->
+            <div class="col-12 mt-4">
+              <h5 class="fw-bold text-success border-bottom pb-2">
+                <i class="bi bi-shield-lock me-2"></i>Security Settings
+              </h5>
+            </div>
+
+            <div class="col-md-6">
+              <label for="new_password" class="form-label fw-semibold small">Change Password</label>
+              <input type="password" class="form-control" id="new_password" name="new_password" placeholder="Leave blank to keep current password" minlength="6">
+              <div class="form-text" style="font-size: 0.75rem;">Minimum 6 characters. Leave empty if not changing.</div>
+            </div>
+
+            <div class="col-12 mt-4">
+              <button type="submit" class="btn btn-km-primary px-4 py-2">
+                <i class="bi bi-save me-1"></i>Save Profile Changes
+              </button>
+            </div>
+
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Mandi Prices (Mandi Bhav) & Price Analytics – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">
+        <i class="bi bi-graph-up-arrow text-success me-2"></i>Mandi Prices & E-NAM Commodity Tracker
+      </h3>
+      <p class="text-muted small mb-0">
+        Live market arrivals, modal trading prices across APMC yards, 6-month historical trends, and official MSP reference rates.
+      </p>
+    </div>
+    <button type="button" class="btn btn-outline-success rounded-pill" onclick="askMandiVoice()">
+      <i class="bi bi-mic-fill text-warning me-1"></i>Ask Rates by Voice
+    </button>
+  </div>
+
+  <!-- Historical Price Trends Chart Card -->
+  <div class="km-card p-4 mb-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-3">
+      <div>
+        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-bezier2 text-primary me-2"></i>Commodity Price Movements (6-Month Trend)</h5>
+        <p class="text-muted small mb-0">Price in ₹ per Quintal across regional APMC hubs (Cotton, Paddy & Maize)</p>
+      </div>
+      <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1">
+        Updated Today
+      </span>
+    </div>
+    <div style="height: 280px; position: relative;">
+      <canvas id="mandiTrendChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Search & Filter Card -->
+  <div class="km-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('market') }}" class="row g-2 align-items-center">
+      <div class="col-md-5 col-12">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0" name="q" placeholder="Search commodity, mandi, variety..." value="{{ search_q }}">
+        </div>
+      </div>
+      <div class="col-md-3 col-6">
+        <select class="form-select" name="commodity">
+          <option value="">All Commodities</option>
+          {% for com in commodities %}
+          <option value="{{ com }}" {% if commodity_filter == com | lower %}selected{% endif %}>{{ com }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3 col-6">
+        <select class="form-select" name="district">
+          <option value="">All Districts</option>
+          {% for dis in districts %}
+          <option value="{{ dis }}" {% if district_filter == dis | lower %}selected{% endif %}>{{ dis }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-1 col-12 d-flex gap-1">
+        <button type="submit" class="btn btn-km-primary w-100" title="Apply Filter">
+          <i class="bi bi-filter"></i>
+        </button>
+        {% if search_q or commodity_filter or district_filter %}
+        <a href="{{ url_for('market') }}" class="btn btn-outline-secondary" title="Clear Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Mandi Price Table -->
+  <div class="km-card mb-5">
+    <div class="km-card-header d-flex justify-content-between align-items-center">
+      <div class="fw-bold"><i class="bi bi-table text-success me-2"></i>Daily APMC Mandi Rates</div>
+      <span class="small text-muted">{{ prices | length }} Market Records Found</span>
+    </div>
+
+    <div class="p-0">
+      {% if prices %}
+      <div class="table-responsive">
+        <table class="km-table">
+          <thead>
+            <tr>
+              <th>Commodity & Variety</th>
+              <th>Market Yard (Mandi)</th>
+              <th>District / State</th>
+              <th>Min Price</th>
+              <th>Max Price</th>
+              <th>Modal (Avg) Price</th>
+              <th>Trend</th>
+              <th>Arrivals</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in prices %}
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">{{ p.commodity }}</div>
+                <div class="small text-muted">{{ p.variety }}</div>
+              </td>
+              <td>
+                <div class="fw-semibold text-dark">{{ p.mandi }}</div>
+              </td>
+              <td>
+                <div class="small text-dark">{{ p.district }}, {{ p.state }}</div>
+              </td>
+              <td class="text-muted">₹{{ "{:,}".format(p.min_price) }}</td>
+              <td class="text-muted">₹{{ "{:,}".format(p.max_price) }}</td>
+              <td>
+                <span class="fw-bold text-success fs-6">₹{{ "{:,}".format(p.modal_price) }}</span>
+                <span class="small text-muted d-block" style="font-size: 0.72rem;">{{ p.unit }}</span>
+              </td>
+              <td>
+                {% if p.trend == 'up' %}
+                  <span class="badge bg-success-subtle text-success border border-success-subtle">
+                    <i class="bi bi-arrow-up-right me-1"></i>{{ p.change_pct }}
+                  </span>
+                {% elif p.trend == 'down' %}
+                  <span class="badge bg-danger-subtle text-danger border border-danger-subtle">
+                    <i class="bi bi-arrow-down-right me-1"></i>{{ p.change_pct }}
+                  </span>
+                {% else %}
+                  <span class="badge bg-light text-muted border">Stable</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">
+                {{ p.arrivals_tonnes }} Tonnes
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="p-5 text-center text-muted">
+        <i class="bi bi-search fs-2 mb-2 d-block"></i>
+        No mandi prices found matching your search.
+        <div class="mt-2">
+          <a href="{{ url_for('market') }}" class="btn btn-sm btn-outline-secondary">Reset Filters</a>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- MSP Reference Guide Section -->
+  <div class="km-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5 class="fw-bold text-dark mb-1"><i class="bi bi-shield-check text-success me-2"></i>Government MSP Reference Rates (Minimum Support Price)</h5>
+        <p class="text-muted small mb-0">Official MSP declared by the Ministry of Agriculture & Farmers Welfare (Rs/Quintal)</p>
+      </div>
+      <span class="badge bg-light text-dark border">Cabinet Approved</span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered table-sm text-center align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th class="text-start">Kharif / Rabi Crop</th>
+            <th>MSP 2024-25 (₹/Qtl)</th>
+            <th>MSP 2025-26 (₹/Qtl)</th>
+            <th>Absolute Increase</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in msp_data %}
+          <tr>
+            <td class="text-start fw-semibold">{{ m.commodity }}</td>
+            <td class="text-muted">₹{{ "{:,}".format(m.msp_2024_25) }}</td>
+            <td class="fw-bold text-success">₹{{ "{:,}".format(m.msp_2025_26) }}</td>
+            <td><span class="badge bg-success-subtle text-success">{{ m.increase }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const historicalTrends = {{ historical_trends | tojson }};
+  initMandiTrendsChart(historicalTrends);
+});
+
+function askMandiVoice() {
+  if (window.krishiVoice) {
+    window.krishiVoice.startListening();
+  }
+}
+</script>
+{% endblock %}

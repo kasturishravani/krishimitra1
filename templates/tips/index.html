@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Farming Tips & Natural Agronomy – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">
+        <i class="bi bi-lightbulb-fill text-warning me-2"></i>Agronomy Best Practices & Organic Farming Tips
+      </h3>
+      <p class="text-muted small mb-0">
+        Sustainable techniques to reduce input costs, enhance soil carbon, conserve groundwater, and boost harvest yields.
+      </p>
+    </div>
+    <button type="button" class="btn btn-outline-success rounded-pill" onclick="askTipsVoice()">
+      <i class="bi bi-mic-fill text-warning me-1"></i>Ask Tips by Voice
+    </button>
+  </div>
+
+  <!-- Search & Category Filters -->
+  <div class="km-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('tips') }}" class="row g-2 align-items-center">
+      <div class="col-md-7 col-12">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0" name="q" placeholder="Search tips (e.g. Jeevamrutha, Neem, AWD, Soil)..." value="{{ search_q }}">
+        </div>
+      </div>
+      <div class="col-md-4 col-10">
+        <select class="form-select" name="category">
+          <option value="">All Agronomy Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-1 col-2 d-flex gap-1">
+        <button type="submit" class="btn btn-km-primary w-100" title="Apply Filter">
+          <i class="bi bi-filter"></i>
+        </button>
+        {% if search_q or category_filter %}
+        <a href="{{ url_for('tips') }}" class="btn btn-outline-secondary" title="Clear Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Tips Grid -->
+  {% if tips %}
+  <div class="row g-4">
+    {% for t in tips %}
+    <div class="col-lg-6 col-12">
+      <div class="km-card km-card-hover h-100 p-4 border-top border-4 border-success d-flex flex-column">
+        
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="d-flex align-items-center gap-2">
+            <div class="stat-icon green" style="width: 44px; height: 44px; font-size: 1.25rem;">
+              <i class="bi {{ t.icon }}"></i>
+            </div>
+            <div>
+              <span class="badge bg-light text-dark border small mb-1">{{ t.category }}</span>
+              <h5 class="fw-bold text-dark mb-0">{{ t.title }}</h5>
+              <div class="small text-muted">{{ t.te_title }}</div>
+            </div>
+          </div>
+          <span class="badge bg-success-subtle text-success border border-success-subtle">{{ t.difficulty }}</span>
+        </div>
+
+        <p class="text-muted small mb-3" style="line-height: 1.5;">
+          {{ t.summary }}
+        </p>
+
+        <!-- Preparation Steps List -->
+        <div class="p-3 mb-3 rounded-3 bg-light border small flex-grow-1">
+          <strong class="text-success d-block mb-2"><i class="bi bi-list-check me-1"></i>Step-by-Step Procedure:</strong>
+          <ol class="mb-0 ps-3" style="line-height: 1.7;">
+            {% for st in t.steps %}
+            <li class="mb-1 text-dark">{{ st }}</li>
+            {% endfor %}
+          </ol>
+        </div>
+
+        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+          <button type="button" class="btn btn-sm btn-km-outline" onclick="speakTip('{{ t.title }}', '{{ t.summary | replace('\'', '') }}')">
+            <i class="bi bi-volume-up-fill me-1"></i>Listen Guide
+          </button>
+          <button type="button" class="btn btn-sm btn-outline-secondary" onclick="askTipInChat('{{ t.title }}')">
+            <i class="bi bi-chat-dots me-1"></i>Ask AI
+          </button>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="km-card p-5 text-center my-4">
+    <div class="stat-icon green mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2rem;">
+      <i class="bi bi-lightbulb"></i>
+    </div>
+    <h4>No Tips Found</h4>
+    <p class="text-muted">No farming tips matched your search query.</p>
+    <a href="{{ url_for('tips') }}" class="btn btn-km-primary mt-2">Reset Filters</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function speakTip(title, summary) {
+  if (window.krishiVoice) {
+    window.krishiVoice.speak(`${title}. ${summary}`, 'en');
+  }
+}
+
+function askTipInChat(title) {
+  if (window.krishiChat) {
+    window.krishiChat.openChat();
+    const input = document.getElementById('kmChatInput');
+    if (input) {
+      input.value = `Tell me more details about ${title}`;
+      window.krishiChat.sendMessage();
+    }
+  }
+}
+
+function askTipsVoice() {
+  if (window.krishiVoice) {
+    window.krishiVoice.startListening();
+  }
+}
+</script>
+{% endblock %}

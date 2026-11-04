@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Government Agricultural Schemes – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+      <h3 class="fw-bold text-dark mb-1">
+        <i class="bi bi-award-fill text-warning me-2"></i>Central & State Government Schemes for Farmers
+      </h3>
+      <p class="text-muted small mb-0">
+        Direct income transfers, crop insurance coverage, micro-irrigation subsidies, and concessional Kisan Credit Cards.
+      </p>
+    </div>
+    <button type="button" class="btn btn-outline-success rounded-pill" onclick="askSchemesVoice()">
+      <i class="bi bi-mic-fill text-warning me-1"></i>Ask Schemes by Voice
+    </button>
+  </div>
+
+  <!-- Search & Filter Card -->
+  <div class="km-card p-3 mb-4">
+    <form method="GET" action="{{ url_for('schemes_list') }}" class="row g-2 align-items-center">
+      <div class="col-md-7 col-12">
+        <div class="input-group">
+          <span class="input-group-text bg-light border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0" name="q" placeholder="Search by scheme name, code (e.g. PM-KISAN, PMFBY) or keyword..." value="{{ search_q }}">
+        </div>
+      </div>
+      <div class="col-md-4 col-10">
+        <select class="form-select" name="category">
+          <option value="">All Scheme Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}" {% if category_filter == cat %}selected{% endif %}>{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-1 col-2 d-flex gap-1">
+        <button type="submit" class="btn btn-km-primary w-100" title="Apply Filter">
+          <i class="bi bi-filter"></i>
+        </button>
+        {% if search_q or category_filter %}
+        <a href="{{ url_for('schemes_list') }}" class="btn btn-outline-secondary" title="Clear Filters">
+          <i class="bi bi-x-lg"></i>
+        </a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+
+  <!-- Schemes Grid -->
+  {% if schemes %}
+  <div class="row g-4">
+    {% for s in schemes %}
+    <div class="col-lg-6 col-12">
+      <div class="km-card km-card-hover h-100 p-4 border-top border-4 border-{{ s.badge }} d-flex flex-column">
+        
+        <div class="d-flex justify-content-between align-items-start mb-2">
+          <div>
+            <span class="badge bg-{{ s.badge }}-subtle text-{{ s.badge }} border border-{{ s.badge }}-subtle mb-1">{{ s.code }}</span>
+            <h5 class="fw-bold text-dark mb-1">{{ s.title }}</h5>
+            <div class="small text-muted">{{ s.te_title }}</div>
+          </div>
+          <span class="badge bg-light text-dark border small">{{ s.category }}</span>
+        </div>
+
+        <div class="p-3 my-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 small">
+          <div class="fw-bold text-success mb-1"><i class="bi bi-cash-stack me-1"></i>Financial Benefit / Subsidy:</div>
+          <div class="text-dark" style="line-height: 1.5;">{{ s.benefit }}</div>
+        </div>
+
+        <div class="mb-3 small">
+          <strong class="text-dark d-block mb-1"><i class="bi bi-check2-circle text-primary me-1"></i>Eligibility:</strong>
+          <span class="text-muted">{{ s.eligibility }}</span>
+        </div>
+
+        <div class="mt-auto d-flex justify-content-between align-items-center pt-3 border-top">
+          <a href="{{ url_for('scheme_detail', scheme_id=s.id) }}" class="btn btn-sm btn-km-primary">
+            <i class="bi bi-file-earmark-text me-1"></i>Application Steps & Docs
+          </a>
+          <a href="{{ s.official_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-secondary">
+            Official Portal <i class="bi bi-box-arrow-up-right ms-1"></i>
+          </a>
+        </div>
+
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="km-card p-5 text-center my-4">
+    <div class="stat-icon amber mx-auto mb-3" style="width: 72px; height: 72px; font-size: 2rem;">
+      <i class="bi bi-award"></i>
+    </div>
+    <h4>No Schemes Found</h4>
+    <p class="text-muted">No government schemes matched your search query.</p>
+    <a href="{{ url_for('schemes_list') }}" class="btn btn-km-primary mt-2">Reset Filters</a>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function askSchemesVoice() {
+  if (window.krishiVoice) {
+    window.krishiVoice.startListening();
+  }
+}
+</script>
+{% endblock %}

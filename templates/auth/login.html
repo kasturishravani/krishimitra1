@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Farmer Login – KrishiMitra{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="km-card p-4 p-md-5 shadow-lg border-0 rounded-4">
+        
+        <div class="text-center mb-4">
+          <div class="d-inline-flex align-items-center justify-content-center bg-success-subtle text-success p-3 rounded-circle mb-3" style="width: 64px; height: 64px;">
+            <i class="bi bi-person-fill fs-2"></i>
+          </div>
+          <h3 class="fw-bold text-dark">Farmer Sign In</h3>
+          <p class="text-muted small">Access your crops, weather alerts, and personalized advisory</p>
+        </div>
+
+        <!-- Demo Account Banner -->
+        <div class="p-3 mb-4 rounded-3 bg-light border border-success-subtle small">
+          <div class="d-flex align-items-center gap-2 text-success fw-bold mb-1">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Demo Farmer Credentials:</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center text-muted">
+            <span>Mobile: <strong>9876543210</strong></span>
+            <span>Password: <strong>farmer123</strong></span>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-success mt-2 w-100 py-1" onclick="fillDemoCreds()">
+            <i class="bi bi-magic me-1"></i>Auto-Fill Demo Credentials
+          </button>
+        </div>
+
+        <form method="POST" action="{{ url_for('login') }}" class="needs-validation" novalidate>
+          <div class="mb-3">
+            <label for="login_id" class="form-label fw-semibold small">Registered Mobile or Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-muted"></i></span>
+              <input type="text" class="form-control border-start-0" id="login_id" name="login_id" placeholder="10-digit mobile or email" required>
+            </div>
+            <div class="invalid-feedback">Please enter your registered mobile number or email.</div>
+          </div>
+
+          <div class="mb-4">
+            <div class="d-flex justify-content-between">
+              <label for="password" class="form-label fw-semibold small">Password</label>
+            </div>
+            <div class="input-group">
+              <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" class="form-control border-start-0" id="password" name="password" placeholder="Enter your password" required>
+            </div>
+            <div class="invalid-feedback">Please enter your password.</div>
+          </div>
+
+          <button type="submit" class="btn btn-km-primary w-100 py-2 fs-6 shadow-sm">
+            <i class="bi bi-box-arrow-in-right me-1"></i>Sign In to Dashboard
+          </button>
+        </form>
+
+        <div class="text-center mt-4 pt-3 border-top">
+          <span class="text-muted small">New to KrishiMitra?</span>
+          <a href="{{ url_for('register') }}" class="fw-bold text-success text-decoration-none ms-1">Create Farmer Account</a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function fillDemoCreds() {
+  document.getElementById('login_id').value = '9876543210';
+  document.getElementById('password').value = 'farmer123';
+}
+</script>
+{% endblock %}
