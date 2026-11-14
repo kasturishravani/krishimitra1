@@ -11,6 +11,7 @@ from config import Config
 import database
 import sample_data
 import chatbot_engine
+import pest_detector
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -570,6 +571,41 @@ def disease_detail(disease_id):
     return render_template('diseases/detail.html', disease=disease, related=related)
 
 
+@app.route('/api/identify-pest', methods=['POST'])
+def api_identify_pest():
+    """
+    AI Identification Endpoint for Crop Pests & Diseases.
+    Accepts image file (multipart/form-data) or base64 JSON from camera capture.
+    """
+    try:
+        file_obj = request.files.get('file')
+        base64_str = None
+        crop_hint = None
+
+        if request.is_json:
+            json_data = request.get_json() or {}
+            base64_str = json_data.get('image')
+            crop_hint = json_data.get('crop')
+        else:
+            base64_str = request.form.get('image')
+            crop_hint = request.form.get('crop')
+
+        image_bytes, filename, err = pest_detector.decode_image_input(file_obj=file_obj, base64_str=base64_str)
+        if err or not image_bytes:
+            return jsonify({
+                'status': 'error',
+                'message': err or 'No valid image provided. Please capture or upload a clear photo of the affected leaf.'
+            }), 400
+
+        result = pest_detector.identify_pest_and_disease(image_bytes, filename=filename or 'leaf.jpg', crop_hint=crop_hint)
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': f"Image analysis encountered an issue: {str(e)}. Please retry with a clear crop photo."
+        }), 500
+
+
 # -----------------------------------------------------------------------------
 # 6. WEATHER INFORMATION
 # -----------------------------------------------------------------------------
@@ -837,6 +873,11 @@ def api_voice_command():
         'పంటలు': url_for('crops_list'),
         'diseases': url_for('diseases_list'),
         'తెగుళ్లు': url_for('diseases_list'),
+        'camera': url_for('diseases_list'),
+        'photo': url_for('diseases_list'),
+        'scan': url_for('diseases_list'),
+        'కెమెరా': url_for('diseases_list'),
+        'స్కాన్': url_for('diseases_list'),
         'schemes': url_for('schemes_list'),
         'పథకాలు': url_for('schemes_list'),
         'tips': url_for('tips'),

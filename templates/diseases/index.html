@@ -12,7 +12,7 @@
         <i class="bi bi-bug text-danger me-2"></i>Crop Disease & Pest Management Guide
       </h3>
       <p class="text-muted small mb-0">
-        Certified remedies, symptom diagnostics, biological solutions (Neem/Jeevamrutha), and chemical control dosages.
+        Certified remedies, live camera diagnostics, biological solutions (Neem/Jeevamrutha), and chemical control dosages.
       </p>
     </div>
     <button type="button" class="btn btn-outline-success rounded-pill" data-bs-toggle="modal" data-bs-target="#kmVoiceModal">
@@ -20,7 +20,283 @@
     </button>
   </div>
 
-  <!-- Search & Filter Card -->
+  <!-- ==========================================
+       AI PEST & DISEASE CAMERA / UPLOAD SCANNER
+       ========================================== -->
+  <div class="pest-scanner-hero mb-4 shadow-sm">
+    <div class="row align-items-center">
+      <div class="col-lg-7 mb-3 mb-lg-0">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <span class="badge bg-success text-white px-3 py-1 rounded-pill">
+            <i class="bi bi-camera-fill me-1"></i>AI Visual Diagnosis
+          </span>
+          <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+            తెలుగు & English
+          </span>
+        </div>
+        <h4 class="fw-bold text-dark mb-1">
+          Scan Affected Crop Leaf or Pest
+        </h4>
+        <p class="text-muted small mb-3" style="line-height: 1.6;">
+          Capture a live photo using your device camera or upload an existing image from your gallery. Our AI engine analyzes the visual symptoms, predicts the pathogen, provides confidence scores, and prescribes immediate organic and chemical treatments.
+        </p>
+
+        <!-- Two Primary Buttons: Take Picture & Upload Image -->
+        <div class="d-flex flex-wrap gap-2 mb-3">
+          <button type="button" id="btnTriggerCamera" class="btn btn-km-primary btn-lg rounded-pill px-4 shadow-sm d-flex align-items-center gap-2">
+            <i class="bi bi-camera-fill fs-5"></i>
+            <span><strong>Take Picture</strong> <span class="d-none d-sm-inline opacity-75 small">/ లైవ్ ఫోటో తీయండి</span></span>
+          </button>
+          
+          <button type="button" id="btnTriggerUpload" class="btn btn-outline-success btn-lg rounded-pill px-4 bg-white shadow-sm d-flex align-items-center gap-2">
+            <i class="bi bi-cloud-arrow-up-fill fs-5 text-success"></i>
+            <span><strong>Upload Image</strong> <span class="d-none d-sm-inline opacity-75 small">/ గ్యాలరీ నుండి అప్‌లోడ్</span></span>
+          </button>
+
+          <!-- Hidden File Input for Gallery Selection -->
+          <input type="file" id="pestImageFileInput" accept="image/*" class="d-none">
+        </div>
+
+        <!-- Optional Crop Selector -->
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <label class="small fw-semibold text-muted text-nowrap">
+            <i class="bi bi-flower2 text-success me-1"></i>Target Crop (Optional):
+          </label>
+          <select id="pestCropSelector" class="form-select form-select-sm w-auto bg-white border">
+            <option value="auto" selected>Auto-Detect Crop (స్వయంచాలక గుర్తింపు)</option>
+            <option value="Paddy (Rice)">Paddy (Rice) - వరి</option>
+            <option value="Cotton">Cotton - పత్తి</option>
+            <option value="Chilli">Chilli - మిరప</option>
+            <option value="Tomato">Tomato - టమోటా</option>
+            <option value="Maize (Corn)">Maize (Corn) - మొక్కజొన్న</option>
+            <option value="Wheat">Wheat - గోధుమ</option>
+            <option value="Groundnut">Groundnut - వేరుశనగ</option>
+            <option value="Soybean">Soybean - సోయాబీన్</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right Column: Drag-and-Drop Dropzone Box -->
+      <div class="col-lg-5">
+        <div id="pestUploadDropzone" class="pest-upload-dropzone">
+          <i class="bi bi-cloud-arrow-up text-success display-4 mb-2 d-block"></i>
+          <h6 class="fw-bold text-dark mb-1">Drag & Drop Crop Photo Here</h6>
+          <p class="text-muted small mb-0">or click <strong>Upload Image</strong> above to browse</p>
+          <div class="small text-muted mt-2" style="font-size: 0.75rem;">
+            Supports JPG, JPEG, PNG, WebP (Max 15 MB)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Alert Box -->
+    <div id="pestScannerErrorAlert" class="alert alert-danger d-none mt-3 mb-0 rounded-3 border-danger shadow-sm" role="alert"></div>
+
+    <!-- ==========================================
+         IMAGE PREVIEW CARD (Visible upon Capture / Upload)
+         ========================================== -->
+    <div id="pestImagePreviewSection" class="mt-4 pt-3 border-top d-none">
+      <div class="d-flex flex-column flex-md-row align-items-center justify-content-between gap-3 bg-white p-3 rounded-4 border shadow-sm">
+        <div class="d-flex align-items-center gap-3">
+          <div class="image-preview-wrapper" style="width: 110px; height: 110px; flex-shrink: 0;">
+            <img id="pestPreviewImg" src="" alt="Selected Crop Photo" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+          <div>
+            <span class="badge bg-success-subtle text-success border border-success-subtle mb-1" id="pestPreviewSourceLabel">
+              Image Ready
+            </span>
+            <h6 class="fw-bold text-dark mb-1">Crop Leaf Photo Selected</h6>
+            <p class="text-muted small mb-0" style="font-size: 0.8rem;">
+              Click <strong>Analyze Crop Leaf</strong> to run AI diagnostics.
+            </p>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="button" id="btnRemovePestImage" class="btn btn-sm btn-outline-danger rounded-pill px-3">
+            <i class="bi bi-trash3 me-1"></i>Remove Image
+          </button>
+          <button type="button" id="btnAnalyzeCropImage" class="btn btn-km-primary rounded-pill px-4 shadow-sm fw-semibold">
+            <i class="bi bi-cpu-fill me-1"></i>Analyze Crop Leaf
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         AI ANALYSIS RESULT CARD (Populated dynamically)
+         ========================================== -->
+    <div id="pestAnalysisResultSection" class="mt-4 d-none">
+      <div class="km-card p-4 border-top border-4 border-danger shadow-lg bg-white">
+        
+        <!-- Header -->
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
+          <div>
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span id="resCropBadge" class="badge bg-light text-dark border">Paddy (Rice)</span>
+              <span id="resTypeBadge" class="badge bg-info-subtle text-info border border-info-subtle">Fungal</span>
+              <span id="resSeverityBadge" class="badge bg-danger-subtle text-danger border border-danger-subtle">Severe Risk</span>
+            </div>
+            <h3 id="resDiseaseName" class="fw-bold text-dark mb-0">Rice Blast (Pyricularia oryzae)</h3>
+            <h5 id="resTeDiseaseName" class="text-success fw-semibold mt-1">వరి అగ్గితెగులు (బ్లాస్ట్)</h5>
+          </div>
+
+          <!-- Confidence Score Box -->
+          <div class="text-end bg-light p-2 px-3 rounded-3 border">
+            <div class="small text-muted fw-semibold">AI Confidence Match:</div>
+            <div class="d-flex align-items-center justify-content-end gap-2 mt-1">
+              <div class="confidence-meter" style="width: 90px;">
+                <div id="resConfidenceMeterFill" class="confidence-meter-fill" style="width: 94%;"></div>
+              </div>
+              <span id="resConfidenceScore" class="fw-bold fs-5 text-success">94.6%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Symptoms Box -->
+        <div class="mb-3">
+          <div class="small fw-semibold text-danger mb-1">
+            <i class="bi bi-eye-fill me-1"></i>Detected Symptoms (లక్షణాలు):
+          </div>
+          <p id="resSymptoms" class="text-dark small mb-0" style="line-height: 1.6;"></p>
+        </div>
+
+        <div class="row g-3 my-2">
+          <!-- Organic / Bio Remedy -->
+          <div class="col-md-6 col-12">
+            <div class="p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 h-100">
+              <h6 class="fw-bold text-success mb-2">
+                <i class="bi bi-flower1 me-1"></i>Certified Organic / Biological Remedy (సేంద్రీయ నివారణ)
+              </h6>
+              <p id="resOrganicRemedy" class="small text-dark mb-0" style="line-height: 1.6;"></p>
+            </div>
+          </div>
+
+          <!-- Chemical Remedy & Dosage -->
+          <div class="col-md-6 col-12">
+            <div class="p-3 rounded-3 bg-primary bg-opacity-10 border border-primary border-opacity-25 h-100">
+              <h6 class="fw-bold text-primary mb-2">
+                <i class="bi bi-capsule me-1"></i>Recommended Chemical Spray & Dosage (రసాయన నివారణ)
+              </h6>
+              <p id="resChemicalRemedy" class="small text-dark mb-0" style="line-height: 1.6;"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preventive Practices -->
+        <div class="p-2 px-3 my-2 rounded bg-light border small text-muted">
+          <strong class="text-dark"><i class="bi bi-shield-check text-success me-1"></i>Prevention Advice:</strong>
+          <span id="resPrevention"></span>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="pt-3 border-top mt-3 d-flex flex-wrap gap-2 justify-content-between align-items-center">
+          <div class="d-flex flex-wrap gap-2">
+            <a id="resDetailBtn" href="#" class="btn btn-sm btn-km-primary">
+              <i class="bi bi-file-earmark-medical me-1"></i>Full Treatment Protocol
+            </a>
+            <button type="button" id="resSpeakBtn" class="btn btn-sm btn-outline-success">
+              <i class="bi bi-volume-up-fill me-1"></i>Listen Spoken Guide
+            </button>
+            <button type="button" id="resChatBtn" class="btn btn-sm btn-outline-secondary">
+              <i class="bi bi-chat-dots me-1"></i>Ask AI Chatbot
+            </button>
+          </div>
+          <button type="button" class="btn btn-sm btn-light border text-muted" onclick="document.getElementById('btnRemovePestImage').click();">
+            <i class="bi bi-camera me-1"></i>Scan Another Leaf
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       CAMERA MODAL (LIVE PREVIEW & CAPTURE)
+       ========================================== -->
+  <div class="modal fade" id="pestCameraModal" tabindex="-1" aria-labelledby="pestCameraModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content border-0 shadow-lg rounded-4">
+        
+        <div class="modal-header border-bottom pb-2">
+          <div class="d-flex align-items-center gap-2">
+            <span class="badge bg-success p-2 rounded-circle"><i class="bi bi-camera-fill text-white"></i></span>
+            <div>
+              <h5 class="modal-title fw-bold text-dark mb-0">Crop Camera Scanner</h5>
+              <div class="small text-muted" style="font-size: 0.75rem;">లైవ్ కెమెరా ద్వారా పంట ఆకు లేదా తెగులు ఫోటో తీయండి</div>
+            </div>
+          </div>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body p-3 p-md-4 text-center">
+          
+          <!-- Camera Error Alert (e.g. Permission Denied) -->
+          <div id="cameraErrorAlert" class="alert alert-danger d-none text-start small mb-3"></div>
+
+          <!-- 1. Live Video Viewfinder Container -->
+          <div id="cameraViewContainer">
+            <div class="camera-viewfinder shadow">
+              <video id="pestCameraVideo" autoplay playsinline muted></video>
+              <div class="viewfinder-target"></div>
+            </div>
+            
+            <p class="small text-muted mt-2 mb-3">
+              Position the affected crop leaf, spot, or pest in the center box for clear diagnostics.
+            </p>
+
+            <div class="d-flex justify-content-center align-items-center gap-3">
+              <button type="button" id="btnSwitchCamera" class="btn btn-outline-secondary rounded-pill px-3" title="Switch between front and back camera">
+                <i class="bi bi-arrow-repeat me-1"></i>Switch Camera
+              </button>
+              
+              <button type="button" id="btnCapturePhoto" class="btn btn-km-primary btn-lg rounded-pill px-4 shadow d-flex align-items-center gap-2">
+                <i class="bi bi-camera-fill fs-4"></i>
+                <span class="fw-bold">Capture Photo</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 2. Captured Photo Snapshot Container (Shown after capture) -->
+          <div id="cameraCapturedContainer" class="d-none">
+            <div class="camera-viewfinder shadow">
+              <img id="capturedPhotoSnapshot" src="" alt="Captured Crop Snapshot">
+            </div>
+
+            <p class="small text-success fw-semibold mt-2 mb-3">
+              <i class="bi bi-check-circle-fill me-1"></i>Photo captured successfully! Review or retake if needed.
+            </p>
+
+            <div class="d-flex justify-content-center align-items-center gap-3">
+              <button type="button" id="btnRetakePhoto" class="btn btn-outline-secondary rounded-pill px-3">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>Retake (మళ్ళీ తీయండి)
+              </button>
+              
+              <button type="button" id="btnUsePhoto" class="btn btn-success btn-lg rounded-pill px-4 shadow fw-bold">
+                <i class="bi bi-check2-circle me-1"></i>Use Photo (ఈ ఫోటోను వాడండి)
+              </button>
+            </div>
+          </div>
+
+          <!-- Hidden Canvas for Frame Processing -->
+          <canvas id="pestCaptureCanvas" class="d-none"></canvas>
+
+        </div>
+
+        <div class="modal-footer border-top py-2 d-flex justify-content-between align-items-center">
+          <div class="small text-muted" style="font-size: 0.75rem;">
+            <i class="bi bi-shield-lock-fill text-success me-1"></i>Camera stream runs locally in your browser and automatically stops on close.
+          </div>
+          <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Close</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       EXISTING SEARCH & FILTER CARD (PRESERVED)
+       ========================================== -->
   <div class="km-card p-3 mb-4">
     <form method="GET" action="{{ url_for('diseases_list') }}" class="row g-2 align-items-center">
       <div class="col-md-5 col-12">
@@ -58,7 +334,9 @@
     </form>
   </div>
 
-  <!-- Quick Symptom Diagnosis Helper Banner -->
+  <!-- ==========================================
+       QUICK SYMPTOM DIAGNOSIS HELPER BANNER (PRESERVED)
+       ========================================== -->
   <div class="p-3 mb-4 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2">
     <div>
       <span class="badge bg-success text-white mb-1"><i class="bi bi-magic me-1"></i>Quick Symptom Match</span>
@@ -72,7 +350,9 @@
     </div>
   </div>
 
-  <!-- Diseases Directory Grid -->
+  <!-- ==========================================
+       DISEASES DIRECTORY GRID (PRESERVED)
+       ========================================== -->
   {% if diseases %}
   <div class="row g-4">
     {% for d in diseases %}
@@ -137,6 +417,8 @@
 {% endblock %}
 
 {% block extra_js %}
+<!-- Pest Scanner Camera & Image Upload Script -->
+<script src="{{ url_for('static', filename='js/pest_scanner.js') }}"></script>
 <script>
 function askDiseaseQuery(diseaseName) {
   if (window.krishiChat) {

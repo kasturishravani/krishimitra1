@@ -9,11 +9,11 @@ class Config:
     
     # MySQL Database Configurations
     MYSQL_HOST = os.environ.get('MYSQL_HOST', '127.0.0.1')
-    MYSQL_PORT = int(os.environ.get('MYSQL_PORT', '3307'))
+    MYSQL_PORT = int(os.environ.get('MYSQL_PORT', '3306'))
     MYSQL_USER = os.environ.get('MYSQL_USER', 'root')
     MYSQL_PASSWORD = os.environ.get('MYSQL_PASSWORD', '')
     MYSQL_DB = os.environ.get('MYSQL_DB', 'krishimitra')
-    MYSQL_UNIX_SOCKET = os.environ.get('MYSQL_UNIX_SOCKET', '/tmp/mysql.sock')
+    MYSQL_UNIX_SOCKET = os.environ.get('MYSQL_UNIX_SOCKET', '')
     
     # SQLite fallback database file if MySQL server is not running
     SQLITE_DB = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'krishimitra.db')
